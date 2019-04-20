@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+ 
+{% block content %}
+<div class="contact">
+  <h2>Contact</h2>
+  
+<!--- The function get_flashed_messages() pulls all flashed messages and returns them. We then simply display each flashed message by using a Jinja2 for loop. Add this code block to contact.html after <h2>Contact</h2> and before the <form> tag. --->
+  {% if success %}
+    <p>Thank you for your message. We'll get back to you shortly.</p>
+ 
+  {% else %}
+ 
+    {% for message in form.name.errors %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+ 
+    {% for message in form.email.errors %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+ 
+    {% for message in form.subject.errors %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+ 
+    {% for message in form.message.errors %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+ 
+    <form action="{{ url_for('contact') }}" method=post>
+      {{ form.hidden_tag() }}
+ 
+      {{ form.name.label }}
+      {{ form.name }}
+ 
+      {{ form.email.label }}
+      {{ form.email }}
+ 
+      {{ form.subject.label }}
+      {{ form.subject }}
+ 
+      {{ form.message.label }}
+      {{ form.message }}
+ 
+      {{ form.submit }}
+    </form>
+</div> 
+  {% endif %}
+{% endblock %}
+
+<!---contact.html template extends layout.html and fills the 'content' block with its own text. We first specify where to send the form data on submission by setting the <form> element's action attribute to the contact() function we created in routes.py (line five). Next, we let the Jinja2 template engine generate the bulk of the form for us (lines 6-20). We start by inserting a hidden tag in line six to protect against CSRF exploits. Lastly, we add each label and field of the form. --->
+
+
