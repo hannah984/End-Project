@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, flash
 from forms import ContactForm
 #import Massage and Mail classes from Flask-Mail
 from flask_mail import Message, Mail
-
+import sqlite3
 #request determines whether the current HTTP method is a GET or a POST
 mail = Mail()
 
@@ -38,30 +38,46 @@ def lifestyle():
 
 #If any validation check fails, form.validate() will be False. The error message All fields are required will be sent to contact.html. Otherwise, we'll see the temporary placeholder string Form posted, indicating the form has been successfully submitted.
 
-@app.route('/contact', methods=['GET', 'POST'])
+@app.route('/contact', methods=['GET', 'POST']) 
 def contact():
   form = ContactForm()
  
-  if request.method == 'POST':
+  if request.method == 'POST':  #submitbutton
     if form.validate() == False:
-      flash('All fields are required.')
-      return render_template('contact.html', form=form)
+      flash('All fields are required.') #error message 
+      return render_template('contact.html', form=form) #still stay at the page
     else:
-      #We start by composing a new message. The Message class takes a subject line, a "from" address, and a "to" address. We then collect the contact form's subject field data with form.subject.data and set it as the new message's subject line. The email will be sent from the account you configured in app.config["MAIL_USERNAME"], so that's what we used here for the from address. The email will be sent to your personal email address so that you can receive and respond to new messages.
-      #Next, we write the email itself. We include the user's name, email and message. I use Python's string formatting operator % to format the email. And finally, we use mail.send(msg) to send the email (line 15).
-      msg = Message(form.subject.data, sender='hannah.rau@code.berlin', recipients=['hanahthecoder@gmail.com'])
+      #start composing a new message. 
+      msg = Message(form.subject.data, sender='hannah.rau@code.berlin', recipients=['hanahthecoder@gmail.com']) #a "from" address, and a "to" address
       msg.body = """
-      From: %s <%s>
+      From: %s <%s> 
       %s
-      """ % (form.name.data, form.email.data, form.message.data)
-      mail.send(msg)
+      """ % (form.name.data, form.email.data, form.message.data) #format the mail - we write the email itself. We include the user's name, email and message
+      mail.send(msg) #message send
 
       return render_template('contact.html', success=True)
  
   elif request.method == 'GET':
     return render_template('contact.html', form=form)
 
- 
+@app.route('/feedback', methods=['GET', 'POST'])
+def feedback():
+  if request.method == 'POST': #submitbutton
+    entered_comment = request.form['comment'] #collect values in a form with method="post"
+    conn =sqlite3.connect('feedback.db') #connect to the database
+    cur = conn.cursor()
+    cur.execute("INSERT INTO feedbackherman (comment) VALUES ('{}')".format(entered_comment)) #add comment to database
+    conn.commit()
+    cur.execute('SELECT comment FROM feedbackherman') #take the comment out of the database 
+    rows = cur.fetchall()
+    return render_template('feedback.html', comments = rows) #display everything
+  else:
+    conn =sqlite3.connect('feedback.db') #just be on the side without typing in a comment - show all comments
+    cur = conn.cursor()
+    cur.execute('SELECT comment FROM feedbackherman')
+    rows = cur.fetchall()
+    return render_template('feedback.html', comments = rows)
+
 if __name__ == '__main__':
   app.run(debug=True)
 
