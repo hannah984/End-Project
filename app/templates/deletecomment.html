@@ -1,0 +1,21 @@
+{% extends "layout_logged_in.html" %}
+  
+{% block content %}
+  <br>
+  <br>
+  <br>
+<ul>
+	{% for comment in comments %}
+     <li class="comment"> {{ comment [0] }} 
+     	<form method="POST" action="/deletecomment">
+     		<input type="text" name="id" value="{{ comment[1]}}" id="id" >
+     		<input type="submit" name="submit" value="delete">
+
+
+     </form></li>
+   {% endfor %}
+</ul>
+
+
+  
+{% endblock %}
